@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Costwen/blog_backend/pkg/setting"
+	"blog_backend/pkg/setting"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Costwen/blog_backend/pkg/setting"
-	"github.com/Costwen/blog_backend/routers"
+	"blog_backend/pkg/setting"
+	"blog_backend/routers"
 )
 
 func main() {
