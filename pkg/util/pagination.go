@@ -5,13 +5,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetPage(c *gin.Context) int {
-	result := 0
-	page, _ := com.StrTo(c.Query("page")).Int()
-	if page > 0 {
-		result = (page - 1) * setting.PageSize
+func Pagination(c *gin.Context) (*options.FindOptions) {
+	page := com.StrTo(c.DefaultQuery("page", "0")).MustInt()
+	if page < 0 {
+		page = 0
 	}
-	return result
+	options := options.Find()
+	start := page * setting.PageSize
+	options.SetSkip(int64(start))
+	options.SetLimit(int64(setting.PageSize))
+
+	return options
 }

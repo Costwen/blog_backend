@@ -3,6 +3,7 @@ package v1
 import (
 	"blog_backend/models"
 	"blog_backend/pkg/e"
+	"blog_backend/pkg/util"
 	"fmt"
 	"net/http"
 
@@ -22,33 +23,35 @@ func Return(status int, code int, data interface{}, c *gin.Context) {
 func GetArticle(c *gin.Context) {
 	article := &models.Article{}
 	id := c.Param("id")
-	code := e.SUCCESS
 	err := article.FindByID(id)
 	if err != nil {
-		code = e.ERROR_NOT_EXIST_ARTICLE
-		Return(http.StatusBadRequest, code, nil, c)
+		Return(http.StatusBadRequest, e.ERROR_NOT_EXIST_ARTICLE, nil, c)
 		return
 	}
-	Return(http.StatusOK, code, article, c)
+	Return(http.StatusOK, e.SUCCESS, article, c)
 }
 
 //获取多个文章
 func GetArticles(c *gin.Context) {
-
+	articles := &models.Articles{}
+	err := articles.FindByPage(util.Pagination(c))
+	if err != nil{
+		Return(http.StatusBadRequest, e.INVALID_PARAMS, nil, c)
+		return
+	}
+	Return(http.StatusOK, e.SUCCESS, articles, c)
 }
 
 //新增文章
 func AddArticle(c *gin.Context) {
-	code := e.SUCCESS
 	article := &models.Article{}
 	err := c.ShouldBind(article)
 	if err != nil {
-		code = e.INVALID_PARAMS
-		Return(http.StatusBadRequest, code, nil, c)
+		Return(http.StatusBadRequest, e.INVALID_PARAMS, nil, c)
 		return
 	}
 	result, _ := article.Insert()
-	Return(http.StatusOK, code, result, c)
+	Return(http.StatusOK, e.SUCCESS, result, c)
 }
 
 //修改文章
@@ -56,6 +59,7 @@ func EditArticle(c *gin.Context) {
 	article := &models.Article{}
 	c.Bind(&article)
 	fmt.Print(article)
+	Return(http.StatusOK, e.SUCCESS, nil, c)
 }
 
 //删除文章
@@ -65,6 +69,5 @@ func DeleteArticle(c *gin.Context) {
 		Id: id,
 	}
 	result, _ := article.Delete()
-	code := e.SUCCESS
-	Return(http.StatusOK, code, result, c)
+	Return(http.StatusOK, e.SUCCESS, result, c)
 }

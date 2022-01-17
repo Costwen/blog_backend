@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Article struct {
@@ -19,18 +20,30 @@ type Article struct {
 	PageView   int64              `bson:"page_view" json:"page_view"`
 }
 
-func (article *Article)FindByID(id string) error{
+type Articles []Article
+
+func (article *Article) FindByID(id string) error {
 	p, _ := primitive.ObjectIDFromHex(id)
 	err := db.Article.FindOne(context.TODO(), bson.M{"_id": p}).Decode(&article)
 	return err
 }
 
-func (article *Article)Insert()(*mongo.InsertOneResult, error) {
+func (article *Article) Insert() (*mongo.InsertOneResult, error) {
 	article.CreateTime = time.Now()
 	article.ModifyTime = time.Now()
 	return db.Article.InsertOne(context.TODO(), article)
 }
 
-func (article *Article)Delete() (*mongo.DeleteResult, error){
-	return db.Article.DeleteOne(context.TODO(), bson.M{"_id": article.Id})	
+func (article *Article) Delete() (*mongo.DeleteResult, error) {
+	return db.Article.DeleteOne(context.TODO(), bson.M{"_id": article.Id})
+}
+
+func (articles *Articles) FindByPage(options *options.FindOptions) error {
+	cursor, err := db.Article.Find(context.TODO(), bson.M{}, options)
+	if err != nil {
+		return err
+	}
+	print(cursor)
+	err = cursor.All(context.TODO(), articles)
+	return err
 }
