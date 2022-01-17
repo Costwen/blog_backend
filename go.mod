@@ -15,4 +15,5 @@ require (
 	github.com/siddontang/ledisdb v0.0.0-20181029004158-becf5f38d373 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/unknwon/com v1.0.1
+	go.mongodb.org/mongo-driver v1.8.2 // indirect
 )

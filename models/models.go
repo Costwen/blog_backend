@@ -1,49 +1,44 @@
 package models
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"blog_backend/pkg/setting"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var db *gorm.DB
+type DataBase struct {
+	db      *mongo.Database
+	Article *mongo.Collection
+}
+
+var db *DataBase
 
 func init() {
-	var (
-		err                                               error
-		dbType, dbName, user, password, host, tablePrefix string
-	)
 	sec, err := setting.Cfg.GetSection("database")
 	if err != nil {
 		log.Fatal(2, "Fail to get section 'database': %v", err)
 	}
-	dbType = sec.Key("Type").String()
-	dbName = sec.Key("Name").String()
-	user = sec.Key("USER").String()
-	password = sec.Key("PASSWORD").String()
-	host = sec.Key("HOST").String()
-	tablePrefix = sec.Key("TABLE_PREFIX").String()
-
-	db, err = gorm.Open(dbType, fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		user,
-		password,
-		host,
-		dbName))
+	dbType := sec.Key("TYPE").String()
+	dbName := sec.Key("NAME").String()
+	host := sec.Key("HOST").String()
+	uri := fmt.Sprintf("%s://%s", dbType, host)
+	clientOptions := options.Client().ApplyURI(uri)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(2, "Fail to connect %v", err)
 	}
-	gorm.DefaultTableNameHandler = func (db *gorm.DB, defaultTableName string) string  {
-	    return tablePrefix + defaultTableName;
+	database := client.Database(dbName)
+	db = &DataBase{
+		Article: database.Collection("article"),
+		db:      database,
 	}
-	db.SingularTable(true)
-	db.LogMode(true)
-	db.DB().SetMaxIdleConns(10)
-	db.DB().SetMaxOpenConns(100)
 }
 
-func CloseDB(){
-	defer db.Close()
+func CloseDB() {
+	defer db.db.Client().Disconnect(context.TODO())
 }
