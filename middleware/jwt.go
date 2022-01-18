@@ -4,6 +4,7 @@ import (
 	"blog_backend/pkg/e"
 	"blog_backend/pkg/util"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,9 +15,9 @@ func JWT() gin.HandlerFunc {
 		var code int
 		var data interface{}
 		code = e.SUCCESS
-		token := c.Request.Header.Get("token")
+		token := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ") 
 		if token == "" {
-			code = e.INVALID_PARAMS
+			code = e.ERROR_AUTH_CHECK_TOKEN_FAIL
 		} else {
 			claims, err := util.ParseToken(token)
 			if err != nil {
@@ -27,12 +28,12 @@ func JWT() gin.HandlerFunc {
 		}
 		if code != e.SUCCESS {
 			c.JSON(http.StatusUnauthorized, gin.H{
-		        "code" : code,
-		        "msg" : e.GetMsg(code),
-		        "data" : data,
-		    })
-		    c.Abort()
-		    return
+				"code": code,
+				"msg":  e.GetMsg(code),
+				"data": data,
+			})
+			c.Abort()
+			return
 		}
 		c.Next()
 	}

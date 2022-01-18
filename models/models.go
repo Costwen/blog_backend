@@ -14,6 +14,7 @@ import (
 type DataBase struct {
 	db      *mongo.Database
 	Article *mongo.Collection
+	User *mongo.Collection
 }
 
 var db *DataBase
@@ -35,6 +36,7 @@ func init() {
 	database := client.Database(dbName)
 	db = &DataBase{
 		Article: database.Collection("article"),
+		User: database.Collection("user"),
 		db:      database,
 	}
 }
