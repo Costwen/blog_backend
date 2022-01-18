@@ -38,12 +38,16 @@ func (article *Article) Delete() (*mongo.DeleteResult, error) {
 	return db.Article.DeleteOne(context.TODO(), bson.M{"_id": article.Id})
 }
 
+func (article *Article) Update() (*mongo.UpdateResult, error) {
+	article.ModifyTime = time.Now()
+	return db.Article.UpdateByID(context.TODO(), article.Id, bson.M{"$set": article})
+}
+
 func (articles *Articles) FindByPage(options *options.FindOptions) error {
 	cursor, err := db.Article.Find(context.TODO(), bson.M{}, options)
 	if err != nil {
 		return err
 	}
-	print(cursor)
 	err = cursor.All(context.TODO(), articles)
 	return err
 }

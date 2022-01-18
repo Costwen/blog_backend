@@ -4,7 +4,6 @@ import (
 	"blog_backend/models"
 	"blog_backend/pkg/e"
 	"blog_backend/pkg/util"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -57,9 +56,18 @@ func AddArticle(c *gin.Context) {
 //修改文章
 func EditArticle(c *gin.Context) {
 	article := &models.Article{}
-	c.Bind(&article)
-	fmt.Print(article)
-	Return(http.StatusOK, e.SUCCESS, nil, c)
+	article.FindByID(c.Param("id"))
+	err := c.ShouldBind(article)
+	if err != nil {
+		Return(http.StatusBadRequest, e.INVALID_PARAMS, nil, c)
+		return 
+	}
+	result, err := article.Update()
+	if err != nil {
+		Return(http.StatusBadRequest, e.INVALID_PARAMS, nil, c)
+		return 
+	}
+	Return(http.StatusOK, e.SUCCESS, result, c)
 }
 
 //删除文章
