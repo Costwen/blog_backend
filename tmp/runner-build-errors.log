@@ -1,2 +1,0 @@
-# blog_backend/middleware
-middleware\jwt.go:19:3: non-bool strings.TrimPrefix(token, "Bearer ") (type string) used as if condition
